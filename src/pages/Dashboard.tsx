@@ -31,8 +31,6 @@ import { cn } from '@/lib/utils';
 import {
   loadProfile,
   loadTestResults,
-  type UserProfile,
-  type TestResult,
 } from '@/lib/storage';
 import { CHAPTERS } from '@/data/questions';
 import { getLevelForXP } from '@/lib/gamification';
@@ -111,77 +109,20 @@ function timeAgo(dateStr: string): string {
   return then.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
-function generateMockResults(): TestResult[] {
-  const modes: TestResult['mode'][] = ['quick', 'full', 'chapter', 'marathon'];
-  const now = new Date();
-  const results: TestResult[] = [];
-  for (let i = 0; i < 8; i++) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    const score = 55 + Math.floor(Math.random() * 40);
-    results.push({
-      id: `mock-${i}`,
-      mode: modes[Math.floor(Math.random() * modes.length)],
-      score,
-      totalQuestions: score > 70 ? 24 : 10,
-      correctAnswers: Math.floor((score / 100) * 24),
-      timeTaken: 600 + Math.floor(Math.random() * 600),
-      passed: score >= 75,
-      date: date.toISOString(),
-      chapterBreakdown: {},
-    });
-  }
-  return results;
+interface ScoreDataPoint {
+  date: string;
+  score: number;
+  label: string;
 }
 
-function getMockProfile(): UserProfile {
-  return {
-    username: 'Alex',
-    avatar: '',
-    totalXP: 3450,
-    currentStreak: 12,
-    longestStreak: 12,
-    lastStudyDate: new Date().toISOString().split('T')[0],
-    testsCompleted: 24,
-    testsPassed: 18,
-    totalQuestionsAnswered: 480,
-    totalCorrect: 394,
-    averageScore: 82,
-    bestScore: 96,
-    fastestTestTime: 720,
-    achievements: ['first_test', 'streak_7'],
-    chapterProgress: [
-      { chapterId: 1, questionsAttempted: 30, questionsCorrect: 24, flashcardsStudied: 12, totalFlashcards: 20, masteryLevel: 'intermediate' },
-      { chapterId: 2, questionsAttempted: 25, questionsCorrect: 20, flashcardsStudied: 8, totalFlashcards: 20, masteryLevel: 'intermediate' },
-      { chapterId: 3, questionsAttempted: 15, questionsCorrect: 8, flashcardsStudied: 5, totalFlashcards: 20, masteryLevel: 'beginner' },
-      { chapterId: 4, questionsAttempted: 20, questionsCorrect: 16, flashcardsStudied: 10, totalFlashcards: 20, masteryLevel: 'intermediate' },
-      { chapterId: 5, questionsAttempted: 18, questionsCorrect: 15, flashcardsStudied: 7, totalFlashcards: 20, masteryLevel: 'beginner' },
-    ],
-    preferredMode: 'system',
-  };
-}
-
-function getScoreTrendData(results: TestResult[], _filter: '7d' | '30d' | 'all') {
-  const sorted = [...results].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  const sliceCount = _filter === '7d' ? 7 : _filter === '30d' ? 30 : sorted.length;
-  const sliced = sorted.slice(-sliceCount);
-
-  if (sliced.length === 0) {
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - (6 - i));
-      return {
-        day: d.toLocaleDateString('en-GB', { weekday: 'short' }),
-        score: 60 + Math.floor(Math.random() * 30),
-        date: d.toISOString(),
-      };
-    });
-  }
-
-  return sliced.map((r) => ({
-    day: new Date(r.date).toLocaleDateString('en-GB', { weekday: 'short' }),
-    score: r.score,
+function getScoreTrendData(results: import('@/lib/storage').TestResult[], filter: '7d' | '30d' | 'all'): ScoreDataPoint[] {
+  const now = Date.now();
+  const cutoff = filter === '7d' ? now - 7 * 86400000 : filter === '30d' ? now - 30 * 86400000 : 0;
+  const filtered = results.filter((r) => new Date(r.date).getTime() >= cutoff);
+  return filtered.slice(0, 20).map((r) => ({
     date: r.date,
+    score: r.score,
+    label: new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
   }));
 }
 
@@ -273,15 +214,9 @@ function StatCard({ icon, colorClass, bgClass, value, label, changeText }: StatC
 /* ------------------------------------------------------------------ */
 export default function Dashboard() {
   const navigate = useNavigate();
-  const profile = useMemo(() => {
-    const p = loadProfile();
-    return p.testsCompleted > 0 ? p : getMockProfile();
-  }, []);
+  const profile = useMemo(() => loadProfile(), []);
 
-  const results = useMemo(() => {
-    const r = loadTestResults();
-    return r.length > 0 ? r : generateMockResults();
-  }, []);
+  const results = useMemo(() => loadTestResults(), []);
 
   const level = useMemo(() => getLevelForXP(profile.totalXP), [profile.totalXP]);
 

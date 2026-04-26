@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   BookOpen, Zap, Target, AlertTriangle, ChevronRight, Crown,
@@ -398,8 +399,6 @@ function CTASection() {
 }
 
 /* ─── Main ─── */
-import { useState } from 'react';
-
 export default function Home() {
   return (
     <Layout>

@@ -227,51 +227,6 @@ export default function Profile() {
     setTestResults(loadTestResults());
   }, []);
 
-  // Generate mock data if empty
-  useEffect(() => {
-    if (testResults.length === 0) {
-      const mock: TestResult[] = [
-        {
-          id: '1',
-          mode: 'quick',
-          score: 80,
-          totalQuestions: 10,
-          correctAnswers: 8,
-          timeTaken: 300,
-          passed: true,
-          date: new Date(Date.now() - 86400000).toISOString(),
-          chapterBreakdown: { 1: { attempted: 5, correct: 4 } },
-        },
-        {
-          id: '2',
-          mode: 'full',
-          score: 75,
-          totalQuestions: 24,
-          correctAnswers: 18,
-          timeTaken: 1200,
-          passed: true,
-          date: new Date(Date.now() - 172800000).toISOString(),
-          chapterBreakdown: { 1: { attempted: 8, correct: 6 }, 3: { attempted: 16, correct: 12 } },
-        },
-        {
-          id: '3',
-          mode: 'chapter',
-          score: 60,
-          totalQuestions: 15,
-          correctAnswers: 9,
-          timeTaken: 600,
-          passed: false,
-          date: new Date(Date.now() - 259200000).toISOString(),
-          chapterBreakdown: { 2: { attempted: 15, correct: 9 } },
-        },
-      ];
-      setTestResults(mock);
-      const p = { ...profile, testsCompleted: 3, testsPassed: 2, totalQuestionsAnswered: 49, totalCorrect: 35, bestScore: 80, averageScore: 72, currentStreak: 5, longestStreak: 12 };
-      setProfile(p);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const levelInfo = getLevelForXP(profile.totalXP);
   const xpInfo = getXPToNextLevel(profile.totalXP);
 

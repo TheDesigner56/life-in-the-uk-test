@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { Zap, Facebook, Twitter, Youtube, Instagram } from 'lucide-react';
 
@@ -10,12 +11,34 @@ const quickLinks = [
 
 const resourceLinks = [
   { to: '/study', label: 'Official Handbook' },
-  { to: '/dashboard', label: 'About' },
-  { to: '/profile', label: 'Contact' },
-  { to: '/profile', label: 'Terms & Privacy' },
+  { to: '/about', label: 'About' },
+  { to: '/contact', label: 'Contact' },
+  { to: '/privacy', label: 'Privacy Policy' },
+  { to: '/terms', label: 'Terms of Service' },
 ];
 
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+
+  useEffect(() => {
+    const existing = localStorage.getItem('lituk_newsletter_email');
+    if (existing) {
+      setSubscribed(true);
+      setEmail(existing);
+    }
+  }, []);
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email.trim()) {
+      localStorage.setItem('lituk_newsletter_email', email.trim());
+      setSubscribed(true);
+    }
+  };
+
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="bg-deep-indigo text-white">
       <div className="mx-auto max-w-[1320px] px-4 py-16 md:px-6 lg:px-8">
@@ -36,25 +59,37 @@ export default function Footer() {
             </p>
             <div className="mt-6 flex items-center gap-3">
               <a
-                href="#"
+                href="https://facebook.com/lifetestpro"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
               >
                 <Facebook className="h-4 w-4" />
               </a>
               <a
-                href="#"
+                href="https://twitter.com/lifetestpro"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Twitter"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
               >
                 <Twitter className="h-4 w-4" />
               </a>
               <a
-                href="#"
+                href="https://youtube.com/@lifetestpro"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
               >
                 <Youtube className="h-4 w-4" />
               </a>
               <a
-                href="#"
+                href="https://instagram.com/lifetestpro"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
               >
                 <Instagram className="h-4 w-4" />
@@ -102,23 +137,35 @@ export default function Footer() {
             <p className="mt-4 text-sm text-white/70">
               Get study tips and new questions delivered to your inbox.
             </p>
-            <div className="mt-4 flex gap-2">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 rounded-full bg-white/10 px-4 py-2 text-sm text-white placeholder:text-white/40 outline-none focus:ring-2 focus:ring-royal-blue"
-              />
-              <button className="rounded-full bg-royal-blue px-4 py-2 text-sm font-semibold text-white transition-all hover:brightness-110">
-                Subscribe
-              </button>
-            </div>
+            {subscribed ? (
+              <p className="mt-4 text-sm font-medium text-green-400">
+                Thanks for subscribing!
+              </p>
+            ) : (
+              <form onSubmit={handleSubscribe} className="mt-4 flex gap-2">
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="flex-1 rounded-full bg-white/10 px-4 py-2 text-sm text-white placeholder:text-white/40 outline-none focus:ring-2 focus:ring-royal-blue"
+                />
+                <button
+                  type="submit"
+                  className="rounded-full bg-royal-blue px-4 py-2 text-sm font-semibold text-white transition-all hover:brightness-110"
+                >
+                  Subscribe
+                </button>
+              </form>
+            )}
           </div>
         </div>
 
         {/* Bottom bar */}
         <div className="mt-12 border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/50">
-            2026 Life in the UK Test Pro. All rights reserved.
+            {currentYear} Life in the UK Test Pro. All rights reserved.
           </p>
           <p className="text-xs text-white/50">
             Made with care for future citizens
